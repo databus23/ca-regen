@@ -68,24 +68,21 @@ func main() {
 	// Test client compatibility with both CAs
 	fmt.Println("\n=== Testing CA Compatibility ===")
 
-	// Test 1: Client with original CA (should fail)
-	fmt.Println("\nTest 1: Client with original CA")
-	err = testClientCompatibility(originalCA, "Original CA")
-	if err != nil {
-		fmt.Printf("❌ Expected failure with original CA: %v\n", err)
-	} else {
-		fmt.Println("⚠ Unexpected success with original CA")
-	}
-
-	// Test 2: Client with new CA (should succeed)
+	// Test 1: Client with new CA (should succeed)
 	fmt.Println("\nTest 2: Client with new CA")
 	err = testClientCompatibility(newCA, "New CA")
 	if err != nil {
 		log.Fatalf("❌ Unexpected failure with new CA: %v", err)
 	}
 
-	fmt.Println("\n🎉 Success! The regenerated CA with critical basic constraints is NOT compatible with clients using the original CA.")
-	fmt.Println("This demonstrates that changing basic constraints to critical breaks backward compatibility.")
+	// Test 1: Client with original CA (should fail)
+	fmt.Println("\nTest 1: Client with original CA")
+	err = testClientCompatibility(originalCA, "Original CA")
+	if err != nil {
+		fmt.Printf("❌ Unexpected failure with original CA: %v\n", err)
+	}
+	fmt.Println("\n🎉 Success! The regenerated CA with critical basic constraints is compatible with clients using the original CA.")
+	fmt.Println("This demonstrates that changing basic constraints to critical does not break backward compatibility.")
 }
 
 func loadCA(certFile, keyFile string) (*x509.Certificate, *rsa.PrivateKey, error) {
