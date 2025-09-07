@@ -24,12 +24,39 @@ go run main.go -ca-cert <path-to-ca-cert.pem> -ca-key <path-to-ca-key.pem>
 ## Example
 
 ```bash
-# Generate a test CA first (optional)
-openssl req -x509 -newkey rsa:2048 -keyout ca-key.pem -out ca-cert.pem -days 365 -nodes -subj "/CN=Test CA"
+# Generate a test CA with non-critical basic constraints (required)
+openssl req -x509 -newkey rsa:2048 -keyout ca-key.pem -out ca-cert.pem -days 365 -nodes \
+  -subj "/CN=Test CA" \
+  -extensions v3_ca \
+  -config <(echo -e "[req]\ndistinguished_name=req\n[v3_ca]\nbasicConstraints=CA:TRUE\nkeyUsage=keyCertSign,cRLSign")
 
 # Run the program
 go run main.go -ca-cert ca-cert.pem -ca-key ca-key.pem
 ```
+
+## Creating a CA with Non-Critical Basic Constraints
+
+The program requires an original CA certificate with **non-critical** basic constraints. Use this simple command:
+
+```bash
+openssl req -x509 -newkey rsa:2048 -keyout ca-key.pem -out ca-cert.pem -days 365 -nodes \
+  -subj "/CN=Test CA" \
+  -extensions v3_ca \
+  -config <(echo -e "[req]\ndistinguished_name=req\n[v3_ca]\nbasicConstraints=CA:TRUE\nkeyUsage=keyCertSign,cRLSign")
+```
+
+To verify the CA has non-critical basic constraints:
+```bash
+openssl x509 -in ca-cert.pem -text -noout | grep -A 3 -B 3 "Basic Constraints"
+```
+
+You should see:
+```
+X509v3 Basic Constraints: 
+    CA:TRUE
+```
+
+**Note**: If you see `X509v3 Basic Constraints: critical`, the CA already has critical basic constraints and the program will reject it.
 
 ## Expected Output
 

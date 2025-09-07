@@ -35,6 +35,12 @@ func main() {
 
 	fmt.Println("✓ Loaded original CA certificate and key")
 
+	// Check that the original CA doesn't have critical basic constraints
+	err = checkOriginalCABasicConstraints(originalCA)
+	if err != nil {
+		log.Fatalf("Original CA validation failed: %v", err)
+	}
+
 	// Generate new CA with critical basic constraints
 	newCA, newCAKey, err := generateNewCA(originalCA, originalCAKey)
 	if err != nil {
@@ -133,6 +139,27 @@ func loadCA(certFile, keyFile string) (*x509.Certificate, *rsa.PrivateKey, error
 	}
 
 	return caCert, caKey, nil
+}
+
+func checkOriginalCABasicConstraints(ca *x509.Certificate) error {
+	// Check if the original CA has critical basic constraints
+	if len(ca.Extensions) > 0 {
+		for _, ext := range ca.Extensions {
+			if len(ext.Id) == 4 && ext.Id[0] == 2 && ext.Id[1] == 5 && ext.Id[2] == 29 && ext.Id[3] == 19 {
+				// This is the basicConstraints extension
+				if ext.Critical {
+					return fmt.Errorf("original CA already has critical basic constraints - this test requires a CA with non-critical basic constraints")
+				} else {
+					fmt.Println("✓ Verified: Original CA has non-critical basic constraints")
+					return nil
+				}
+			}
+		}
+	}
+
+	// If no basic constraints extension found, that's also acceptable
+	fmt.Println("✓ Verified: Original CA has no basic constraints extension (non-critical)")
+	return nil
 }
 
 func generateNewCA(originalCA *x509.Certificate, originalCAKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
