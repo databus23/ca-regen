@@ -140,7 +140,7 @@ func generateNewCA(originalCA *x509.Certificate, originalCAKey *rsa.PrivateKey) 
 	// Use the same serial number as the original
 	newCATemplate := &x509.Certificate{
 		SerialNumber:          originalCA.SerialNumber,
-		Subject:               originalCA.Subject,
+		RawSubject:            originalCA.RawSubject,
 		NotBefore:             originalCA.NotBefore,
 		NotAfter:              originalCA.NotAfter,
 		IsCA:                  true,
@@ -151,6 +151,8 @@ func generateNewCA(originalCA *x509.Certificate, originalCAKey *rsa.PrivateKey) 
 		Issuer:             originalCA.Issuer,
 		SignatureAlgorithm: originalCA.SignatureAlgorithm,
 		PublicKeyAlgorithm: originalCA.PublicKeyAlgorithm,
+		AuthorityKeyId:     originalCA.AuthorityKeyId,
+		SubjectKeyId:       originalCA.SubjectKeyId,
 	}
 
 	// Create the new CA certificate (self-signed)
