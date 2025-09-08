@@ -172,7 +172,7 @@ func generateNewCA(originalCA *x509.Certificate, originalCAKey *rsa.PrivateKey) 
 		NotAfter:              originalCA.NotAfter,
 		IsCA:                  true,
 		ExtKeyUsage:           originalCA.ExtKeyUsage,
-		KeyUsage:              originalCA.KeyUsage,
+		KeyUsage:              originalCA.KeyUsage | x509.KeyUsageCertSign | x509.KeyUsageDataEncipherment | x509.KeyUsageDigitalSignature,
 		BasicConstraintsValid: true,
 		// Copy other relevant fields from original CA
 		Issuer:             originalCA.Issuer,
